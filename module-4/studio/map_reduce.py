@@ -15,7 +15,8 @@ joke_prompt = """Generate a joke about {subject}"""
 best_joke_prompt = """Below are a bunch of jokes about {topic}. Select the best one! Return the ID of the best one, starting 0 as the ID for the first joke. Jokes: \n\n  {jokes}"""
 
 # LLM
-model = ChatOpenAI(model="gpt-4o", temperature=0) 
+from langchain_anthropic import ChatAnthropic
+llm = ChatAnthropic(model="claude-3-haiku-20240307")
 
 # Define the state
 class Subjects(BaseModel):
@@ -32,7 +33,7 @@ class OverallState(TypedDict):
 
 def generate_topics(state: OverallState):
     prompt = subjects_prompt.format(topic=state["topic"])
-    response = model.with_structured_output(Subjects).invoke(prompt)
+    response = llm.with_structured_output(Subjects).invoke(prompt)
     return {"subjects": response.subjects}
 
 class JokeState(TypedDict):
@@ -43,13 +44,13 @@ class Joke(BaseModel):
 
 def generate_joke(state: JokeState):
     prompt = joke_prompt.format(subject=state["subject"])
-    response = model.with_structured_output(Joke).invoke(prompt)
+    response = llm.with_structured_output(Joke).invoke(prompt)
     return {"jokes": [response.joke]}
 
 def best_joke(state: OverallState):
     jokes = "\n\n".join(state["jokes"])
     prompt = best_joke_prompt.format(topic=state["topic"], jokes=jokes)
-    response = model.with_structured_output(BestJoke).invoke(prompt)
+    response = llm.with_structured_output(BestJoke).invoke(prompt)
     return {"best_selected_joke": state["jokes"][response.id]}
 
 def continue_to_jokes(state: OverallState):

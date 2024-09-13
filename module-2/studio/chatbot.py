@@ -3,8 +3,8 @@ from langgraph.graph import MessagesState
 from langgraph.graph import StateGraph, START, END
 
 # We will use this model for both the conversation and the summarization
-from langchain_openai import ChatOpenAI
-model = ChatOpenAI(model="gpt-4o", temperature=0) 
+from langchain_anthropic import ChatAnthropic
+llm = ChatAnthropic(model="claude-3-haiku-20240307")
 
 # State class to store messages and summary
 class State(MessagesState):
@@ -28,7 +28,7 @@ def call_model(state: State):
     else:
         messages = state["messages"]
     
-    response = model.invoke(messages)
+    response = llm.invoke(messages)
     return {"messages": response}
 
 # Determine whether to end or summarize the conversation
@@ -65,7 +65,7 @@ def summarize_conversation(state: State):
 
     # Add prompt to our history
     messages = state["messages"] + [HumanMessage(content=summary_message)]
-    response = model.invoke(messages)
+    response = llm.invoke(messages)
     
     # Delete all but the 2 most recent messages and add our summary to the state 
     delete_messages = [RemoveMessage(id=m.id) for m in state["messages"][:-2]]

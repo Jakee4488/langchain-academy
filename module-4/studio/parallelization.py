@@ -12,7 +12,8 @@ from langchain_openai import ChatOpenAI
 
 from langgraph.graph import StateGraph, START, END
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0) 
+from langchain_anthropic import ChatAnthropic
+llm = ChatAnthropic(model="claude-3-haiku-20240307")
 
 class State(TypedDict):
     question: str
